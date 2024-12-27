@@ -3,15 +3,12 @@ package main
 import (
 	"advent2024/internal/utils"
 	"bufio"
-	"embed"
 	"log"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 )
-
-var content embed.FS
 
 func main() {
 	// Read in the d1input.txt file
