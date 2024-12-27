@@ -1,7 +1,9 @@
 package main
 
 import (
+	"advent2024/internal/utils"
 	"bufio"
+	"embed"
 	"log"
 	"os"
 	"sort"
@@ -9,30 +11,11 @@ import (
 	"strings"
 )
 
-func assert(condition bool, message string) {
-	if !condition {
-		panic(message)
-	}
-}
-
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
-
-func sumInts(numbers []int) int {
-	sum := 0
-	for _, num := range numbers {
-		sum += num
-	}
-	return sum
-}
+var content embed.FS
 
 func main() {
 	// Read in the d1input.txt file
-	file, err := os.Open("inputs/d1input.txt")
+	file, err := os.Open("d1input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +27,7 @@ func main() {
 	for scanner.Scan() {
 		line := scanner.Text()
 		pair := strings.Fields(line)
-		assert(len(pair) == 2, "must only be 2 in a pair: "+strings.Join(pair, "  "))
+		utils.Assert(len(pair) == 2, "must only be 2 in a pair: "+strings.Join(pair, "  "))
 		leftNumber, _ := strconv.Atoi(pair[0])
 		rightNumber, _ := strconv.Atoi(pair[1])
 		left = append(left, leftNumber)
@@ -63,11 +46,11 @@ func main() {
 	distances := make([]int, len(left))
 
 	for i := 0; i < len(left); i++ {
-		distance := abs(left[i] - right[i])
+		distance := utils.Abs(left[i] - right[i])
 
 		distances = append(distances, distance)
 	}
 	// sum distances
-	sum := sumInts(distances)
+	sum := utils.SumInts(distances)
 	log.Println(sum)
 }
