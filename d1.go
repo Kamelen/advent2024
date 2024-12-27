@@ -32,7 +32,7 @@ func sumInts(numbers []int) int {
 
 func main() {
 	// Read in the d1input.txt file
-	file, err := os.Open("d1input.txt")
+	file, err := os.Open("inputs/d1input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
