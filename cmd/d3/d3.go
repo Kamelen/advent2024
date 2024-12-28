@@ -24,13 +24,25 @@ func extractMulNumbers(line string) (int, int) {
 
 func calcMulsInLine(line string) int {
 	sum := 0
+	enabled := true
 
 	l := len(line)
 	for i := 0; i < len(line); i++ {
+		// Check if we find a do or dont
+		if l > i+7 && line[i:i+7] == "don't()" {
+			println("dont")
+			enabled = false
+		} else if l > i+4 && line[i:i+4] == "do()" {
+			println("do")
+			enabled = true
+		}
+
 		// make sure to check that the line is still big enough before checking for mul(
 		if l > i+3 && line[i:i+4] == "mul(" {
 			mul1, mul2 := extractMulNumbers(line[i+4:])
-			sum += mul1 * mul2
+			if enabled {
+				sum += mul1 * mul2
+			}
 		}
 	}
 
@@ -46,10 +58,13 @@ func main() {
 	defer file.Close()
 
 	sum := 0
+	oneLine := ""
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		sum += calcMulsInLine(line)
+		oneLine += line
 	}
+
+	sum += calcMulsInLine(oneLine)
 	println(sum)
 }
