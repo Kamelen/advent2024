@@ -8,7 +8,6 @@ import (
 )
 
 // Messied the code a bit but verrrrrrry helpful to chekc against their examples
-// Allowed me to find a bug where i did not account for the final letter being an index[0]
 func printMatricWithCheck(matrix [][]rune, checks [][]bool) {
 	for i, row := range matrix {
 		for j, letter := range row {
@@ -50,15 +49,11 @@ func main() {
 	}
 
 	// using separate hit sums just for debugging
-	vertHits := 0
-	horzHits := 0
 	diagHits := 0
 	// okay now lets start processing the matrix
 	for i, row := range letterMatrix {
 		for j, letter := range row {
-			if letter == 'X' {
-				vertHits += searchVert(i, j, letterMatrix, checkMatrix)
-				horzHits += searchHoriz(i, j, letterMatrix, checkMatrix)
+			if letter == 'A' {
 				diagHits += searchDiag(i, j, letterMatrix, checkMatrix)
 			}
 		}
@@ -66,119 +61,56 @@ func main() {
 
 	printMatricWithCheck(letterMatrix, checkMatrix)
 
-	log.Printf("vertHits %d, horzHits %d, diagHits %d, sum %d", vertHits, horzHits, diagHits, vertHits+horzHits+diagHits)
-}
-
-func searchVert(i int, j int, lm [][]rune, cm [][]bool) int {
-	hits := 0
-
-	//^
-	if i-3 >= 0 {
-		if string([]rune{lm[i][j], lm[i-1][j], lm[i-2][j], lm[i-3][j]}) == "XMAS" {
-			cm[i][j] = true
-			cm[i-1][j] = true
-			cm[i-2][j] = true
-			cm[i-3][j] = true
-			hits++
-		}
-	}
-
-	// v
-	if len(lm) > i+3 {
-		if string([]rune{lm[i][j], lm[i+1][j], lm[i+2][j], lm[i+3][j]}) == "XMAS" {
-			cm[i][j] = true
-			cm[i+1][j] = true
-			cm[i+2][j] = true
-			cm[i+3][j] = true
-			hits++
-		}
-	}
-
-	return hits
-}
-
-func searchHoriz(i int, j int, lm [][]rune, cm [][]bool) int {
-	hits := 0
-	//->
-	if len(lm[i]) > j+3 {
-		println()
-		if string([]rune{lm[i][j], lm[i][j+1], lm[i][j+2], lm[i][j+3]}) == "XMAS" {
-			cm[i][j] = true
-			cm[i][j+1] = true
-			cm[i][j+2] = true
-			cm[i][j+3] = true
-			hits++
-		}
-	}
-	//<-
-	if j-3 >= 0 {
-		if string([]rune{lm[i][j], lm[i][j-1], lm[i][j-2], lm[i][j-3]}) == "XMAS" {
-			cm[i][j] = true
-			cm[i][j-1] = true
-			cm[i][j-2] = true
-			cm[i][j-3] = true
-			hits++
-		}
-	}
-	return hits
+	log.Printf("diagHits %d", diagHits)
 }
 
 // Helper diagram to get my indicies right :)
 //^i-x > 0                 len(lm[i]) > j+x ->
-//              S(i-3, j+3)
-//< j-x > 0   A(i-2, j+2)
-//          M(i-1, j+1)
-//        X(i,j)
-//      M(i+1, j-1)
-//    A(i+2, j-2)
-//  S(i+3, j-3)
+//
+//< j-x > 0
+//                M   M        S(i-1,j-1)   S(i-1)(j+1)                   AND any combination of both
+//                  A                   A(i,j)
+//                S   S       M(i+1, j-1)   M(i+1, j+1)
+//
+//
 // v len[lm] > i+X
 
 func searchDiag(i int, j int, lm [][]rune, cm [][]bool) int {
 	hits := 0
-	// -> ^ -i +j
-	if i-3 >= 0 && len(lm[i-3]) > j+3 {
-		if string([]rune{lm[i][j], lm[i-1][j+1], lm[i-2][j+2], lm[i-3][j+3]}) == "XMAS" {
-			cm[i][j] = true
-			cm[i-1][j+1] = true
-			cm[i-2][j+2] = true
-			cm[i-3][j+3] = true
-			hits++
-		}
-	}
 
-	// -> v +i +j
-	if len(lm) > i+3 && len(lm[i+3]) > j+3 {
-		if string([]rune{lm[i][j], lm[i+1][j+1], lm[i+2][j+2], lm[i+3][j+3]}) == "XMAS" {
+	// diag 1 hit? can be SAM or MAS
+	//\
+	// \
+	//  \
+	log.Printf("diag1 %d %d", i, j)
+	if i-1 >= 0 && j-1 >= 0 && len(lm) > i+1 && len(lm[i+1]) > j+1 {
+		diag := string([]rune{lm[i-1][j-1], lm[i][j], lm[i+1][j+1]})
+		if diag == "MAS" || diag == "SAM" {
+			cm[i-1][j-1] = true
 			cm[i][j] = true
 			cm[i+1][j+1] = true
-			cm[i+2][j+2] = true
-			cm[i+3][j+3] = true
 			hits++
 		}
 	}
 
-	// <- ^ -i -j
-	if i-3 >= 0 && j-3 >= 0 {
-		if string([]rune{lm[i][j], lm[i-1][j-1], lm[i-2][j-2], lm[i-3][j-3]}) == "XMAS" {
-			cm[i][j] = true
-			cm[i-1][j-1] = true
-			cm[i-2][j-2] = true
-			cm[i-3][j-3] = true
-			hits++
-		}
-	}
-
-	//<- v +i -j
-	if len(lm) > i+3 && j-3 >= 0 {
-		if string([]rune{lm[i][j], lm[i+1][j-1], lm[i+2][j-2], lm[i+3][j-3]}) == "XMAS" {
-			cm[i][j] = true
+	// diag 2 hit? can be SAM or MAS
+	//     /
+	//   /
+	// /
+	if i-1 >= 0 && len(lm[i-1]) > j+1 && j-1 >= 0 && len(lm) > i+1 {
+		diag := string([]rune{lm[i+1][j-1], lm[i][j], lm[i-1][j+1]})
+		if diag == "MAS" || diag == "SAM" {
 			cm[i+1][j-1] = true
-			cm[i+2][j-2] = true
-			cm[i+3][j-3] = true
+			cm[i][j] = true
+			cm[i-1][j+1] = true
 			hits++
 		}
 	}
 
-	return hits
+	// We only count a hit if both diags are found, needs to be a X of MAS
+	if hits == 2 {
+		return 1
+	} else {
+		return 0
+	}
 }
